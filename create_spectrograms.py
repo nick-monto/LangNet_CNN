@@ -2,6 +2,7 @@ import os
 import numpy as np
 from collections import OrderedDict
 from scipy.io import wavfile
+from scipy.signal import butter, lfilter
 from pylab import *
 from matplotlib import *
 
@@ -88,7 +89,8 @@ def my_specgram(x, NFFT=256, Fs=2, Fc=0, detrend=None,
     # this will fail if there isn't a current axis in the global scope
     ax = gca()
     Pxx, freqs, bins = mlab.specgram(x, NFFT, Fs, detrend,
-         window, noverlap, pad_to, sides, scale_by_freq)
+                                     window, noverlap, pad_to,
+                                     sides, scale_by_freq)
 
     # modified here
     #####################################
@@ -121,7 +123,7 @@ def plot_spectrogram(audiopath, plotpath=None, NFFT=1024,
     Pxx, freqs, bins, im = my_specgram(data, NFFT=NFFT, Fs=fs,
                                        Fc=0, detrend=None,
                                        window=np.hanning(NFFT),
-                                       noverlap=512, cmap='viridis',
+                                       noverlap=512, cmap='greys',
                                        xextent=None,
                                        pad_to=None, sides='default',
                                        scale_by_freq=None,
@@ -135,9 +137,29 @@ def plot_spectrogram(audiopath, plotpath=None, NFFT=1024,
     pyplot.clf()
 
 
+def butter_bandpass(lowcut, highcut, fs, order=5):
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = butter(order, [low, high], btype='band')
+    return b, a
+
+
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
+
+
+def apply_bpFilter(audiopath, lowcut, highcut, order=5):
+    fs, data = wavfile.read(audiopath)
+    filt_data = butter_bandpass_filter(data, lowcut, highcut, fs, order=6)
+    return filt_data
+
+
 # test function
 plot_spectrogram(INPUT_FOLDER + languages[0], plotpath=None, NFFT=1024,
-                 freq_min=80, freq_max=5500)
+                 freq_min=0, freq_max=5500)
 
 # constructing spectrogram loop
 for key in audio_dict:
@@ -149,8 +171,8 @@ for key in audio_dict:
     for i in range(0, 100):  # create spectrograms for the first 100 audiofiles
         plot_spectrogram('../../' + INPUT_FOLDER + str(key) + '/' +
                          audio_dict[key][i],
-                         binsize=2**10,
                          plotpath=str(audio_dict[key][i][:-4]) + '.png',
-                         ylim=(0, 5500))
+                         NFFT=1024,
+                         freq_min=0, freq_max=5500)
     print('Going back to original directory.')
     os.chdir(SCRIPT_DIR)
