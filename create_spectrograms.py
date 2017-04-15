@@ -4,6 +4,7 @@ from my_spectrogram import my_specgram
 from collections import OrderedDict
 from scipy.io import wavfile
 import matplotlib.pylab as plt
+from itertools import repeat
 
 
 SCRIPT_DIR = os.getcwd()
@@ -47,22 +48,26 @@ def plot_spectrogram(audiopath, plotpath=None, NFFT_window=0.05,
 
 
 # test function
-plot_spectrogram('Input_audio_wav/Italian/ita-0011acd6.wav', plotpath=None,
-                 NFFT_window=0.05, noverlap_window=0.045,
-                 freq_min=30, freq_max=5500)
+# plot_spectrogram('Input_audio_wav/Italian/ita-0011acd6.wav', plotpath=None,
+#                  NFFT_window=0.05, noverlap_window=0.045,
+#                  freq_min=30, freq_max=5500)
 
 # constructing spectrogram loop
 for key in audio_dict:
     if not os.path.exists(OUTPUT_FOLDER + str(key)):
         os.makedirs(OUTPUT_FOLDER + str(key))
-    print('Successfully created a folder for ' + str(key) + '!')
+        print('Successfully created a folder for ' + str(key) + '!')
+    print('Moving to the {} folder.'.format(key))
     os.chdir(OUTPUT_FOLDER + str(key))
     print('Populating with spectrograms...')
     for i in range(0, 100):  # create spectrograms for the first 100 audiofiles
-        plot_spectrogram('../../' + INPUT_FOLDER + str(key) + '/' +
-                         audio_dict[key][i],
-                         plotpath=str(audio_dict[key][i][:-4]) + '.png',
-                         NFFT_window=0.05, noverlap_window=0.045,
-                         freq_min=30, freq_max=5500)
+        for j in range(0, 20):
+            plot_spectrogram('../../' + INPUT_FOLDER + str(key) + '/' +
+                             audio_dict[key][i],
+                             plotpath=str(audio_dict[key][i][:-4]) + '_' + str(j) + '.png',
+                             NFFT_window=0.05, noverlap_window=0.045,
+                             freq_min=30, freq_max=5500)
+        print('Done with {}. Moving onto {}.'.format(audio_dict[key][i][:-4],
+                                                     audio_dict[key][i+1][:-4]))
     print('Going back to original directory.')
     os.chdir(SCRIPT_DIR)

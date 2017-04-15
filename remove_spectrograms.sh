@@ -1,8 +1,8 @@
 #!/bin/bash
+echo Removing spectrograms, cause you fucked up...
 for d in ./Input_spectrogram/*; do
   echo Changing to $d;
   cd $d;
-  echo Removing spectrograms, cause you fucked up...
   for i in *.png; do
     rm "$i";
     done
