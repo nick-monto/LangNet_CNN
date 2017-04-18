@@ -28,20 +28,23 @@ callbacks_list = [checkpoint]
 # model creation: Three convolutional layers
 model = Sequential()
 
-model.add(Convolution2D(32, 3, 3, border_mode='same',
+model.add(Convolution2D(32, 5, 5, border_mode='same',
                         input_shape=(img_width, img_height, 1)))
+model.add(Activation('relu'))
+
+model.add(Convolution2D(64, 5, 5, border_mode='same'))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Convolution2D(64, 3, 3, border_mode='same'))
+model.add(Convolution2D(128, 3, 3, border_mode='same'))
 model.add(Activation('relu'))
 
-model.add(Convolution2D(128, 3, 3, border_mode='same'))
+model.add(Convolution2D(256, 3, 3, border_mode='same'))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Flatten())  # converts 3D feature mapes to 1D feature vectors
-model.add(Dense(128))
+model.add(Dense(256))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))  # reset half of the weights to zero
 

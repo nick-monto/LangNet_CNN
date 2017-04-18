@@ -4,7 +4,6 @@ from my_spectrogram import my_specgram
 from collections import OrderedDict
 from scipy.io import wavfile
 import matplotlib.pylab as plt
-from itertools import repeat
 
 
 SCRIPT_DIR = os.getcwd()
@@ -40,7 +39,7 @@ def plot_spectrogram(audiopath, plotpath=None, NFFT_window=0.05,
                                        minfreq=freq_min, maxfreq=freq_max)
     plt.axis(axis)
     if plotpath:
-        plt.savefig(plotpath, bbox_inches='tight', transparent=True)
+        plt.savefig(plotpath, bbox_inches='tight', transparent=False)
     else:
         plt.show()
 
