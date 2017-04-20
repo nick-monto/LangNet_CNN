@@ -29,7 +29,7 @@ callbacks_list = [checkpoint]
 model = Sequential()
 
 model.add(Convolution2D(32, 5, 5, border_mode='same',
-                        input_shape=(img_width, img_height, 1)))
+                        input_shape=(img_width, img_height, 3)))
 model.add(Activation('relu'))
 
 model.add(Convolution2D(64, 5, 5, border_mode='same'))
