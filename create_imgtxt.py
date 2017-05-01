@@ -20,7 +20,3 @@ for key in spec_dict:
     os.chdir(SCRIPT_DIR)
 
 txtfile.close()
-
-# this will be used for setting up the stim labels
-import pandas as pd
-stim = pd.read_table('img_set.txt', delim_whitespace=True, header=None)
