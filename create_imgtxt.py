@@ -1,7 +1,7 @@
 import os
 
 SCRIPT_DIR = os.getcwd()
-INPUT_FOLDER = 'Input_spectrogram/'
+INPUT_FOLDER = 'Input_spectrogram/Training/'
 languages = os.listdir(INPUT_FOLDER)
 languages.sort()
 
