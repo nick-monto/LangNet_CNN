@@ -5,6 +5,9 @@ from my_spectrogram import my_specgram
 from collections import OrderedDict
 from scipy.io import wavfile
 import matplotlib.pylab as plt
+from pylab import rcParams
+
+rcParams['figure.figsize'] = 5, 3
 
 SCRIPT_DIR = os.getcwd()
 INPUT_FOLDER = 'Input_audio_wav/'
@@ -39,10 +42,10 @@ def plot_spectrogram(audiopath, plotpath=None, NFFT_window=0.025,
                                        minfreq=freq_min, maxfreq=freq_max)
     plt.axis(axis)
     if plotpath:
-        plt.savefig(plotpath, bbox_inches='tight', transparent=False)
+        plt.savefig(plotpath, bbox_inches='tight',
+                    transparent=False, pad_inches=0.05, dpi=96)
     else:
         plt.show()
-
     plt.clf()
 
 # Checking out some other ways to plot spectrograms
