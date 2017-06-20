@@ -10,9 +10,9 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras.callbacks import ModelCheckpoint
 
-img_width, img_height = 200, 125  # output of mlab.specgram
+img_height, img_width = 120, 200
 
-num_epochs = 25
+num_epochs = 10
 
 
 def find(pattern, path):
@@ -32,7 +32,7 @@ def load_image(path):
     return img_data
 
 
-stim_train = pd.read_table('img_set.txt',
+stim_train = pd.read_table('img_set_small.txt',
                            delim_whitespace=True,
                            names=['stimulus', 'language'])
 
@@ -41,15 +41,15 @@ stim = stim_train['stimulus']
 labels = pd.get_dummies(stim_train['language'])
 
 # generate a train and validate set
-X_train, X_test, y_train, y_test = train_test_split(stim,
-                                                    labels,
-                                                    test_size=0.2)
+X_train, X_val, y_train, y_val = train_test_split(stim,
+                                                  labels,
+                                                  test_size=0.2)
 
 labels_train = y_train.values
-labels_test = y_test.values
+labels_val = y_val.values
 
 training_data_dir = 'Input_spectrogram/Training'  # directory for training data
-test_data_dir = 'Input_spectrogram/Test'  # directory for test data
+# test_data_dir = 'Input_spectrogram/Test'  # directory for test data
 
 print("Preparing the input and labels...")
 specs_train_input = []
@@ -57,17 +57,22 @@ for i in range(len(X_train)):
     specs_train_input.append(load_image(find(X_train.iloc[i],
                                              training_data_dir)))
 specs_train_input = np.asarray(specs_train_input)
-specs_train_input = specs_train_input.reshape((640, img_height, img_width, 1))
-print("Done!")
-# specs_test_input = np.zeros((len(X_test), height*width*1))
-# for i in range(len(X_test)):
-#     specs_test_input[i] = load_image(find(X_test.iloc[i], INPUT_FOLDER))
+specs_train_input = specs_train_input.reshape((len(X_train),
+                                               img_height, img_width, 1))
 
+specs_val_input = []
+for i in range(len(X_val)):
+    specs_val_input.append(load_image(find(X_val.iloc[i],
+                                           training_data_dir)))
+specs_val_input = np.asarray(specs_val_input)
+specs_val_input = specs_val_input.reshape((len(X_val),
+                                           img_height, img_width, 1))
+print("Done!")
 
 # set of augments that will be applied to the training data
-datagen = ImageDataGenerator(featurewise_center=True,
-                             featurewise_std_normalization=True,
-                             rotation_range=0.)
+datagen = ImageDataGenerator(rescale=1./255,
+                             featurewise_center=True,
+                             featurewise_std_normalization=True)
 
 
 checkpoint = ModelCheckpoint('weights.best.hdf5', monitor='accuracy',
@@ -114,16 +119,21 @@ model.compile(loss='categorical_crossentropy',
 
 # compute quantities required for featurewise normalization
 datagen.fit(specs_train_input)
+datagen.fit(specs_val_input)
 
 print("Initializing the model...")
 # fits the model on batches with real-time data augmentation:
 model.fit_generator(datagen.flow(specs_train_input,
                                  labels_train,
-                                 batch_size=1),
-                    steps_per_epoch=len(X_train) / 1,
+                                 batch_size=16),
+                    steps_per_epoch=len(X_train) / 16,
                     epochs=num_epochs,
                     verbose=1,
-                    callbacks=callbacks_list)
+                    callbacks=callbacks_list,
+                    validation_data=datagen.flow(specs_val_input,
+                                                 labels_val,
+                                                 batch_size=16),
+                    validation_steps=len(X_val) / 16)
 
 
 # # this generator will read pictures found in a sub folder
