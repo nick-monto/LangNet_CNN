@@ -32,7 +32,7 @@ def load_image(path):
     return img_data
 
 
-stim_train = pd.read_table('img_set_small.txt',
+stim_train = pd.read_table('img_set.txt',
                            delim_whitespace=True,
                            names=['stimulus', 'language'])
 
@@ -59,6 +59,7 @@ for i in range(len(X_train)):
 specs_train_input = np.asarray(specs_train_input)
 specs_train_input = specs_train_input.reshape((len(X_train),
                                                img_height, img_width, 1))
+print('There are a total of {} training stimuli!'.format(specs_train_input.shape[0]))
 
 specs_val_input = []
 for i in range(len(X_val)):
@@ -67,15 +68,15 @@ for i in range(len(X_val)):
 specs_val_input = np.asarray(specs_val_input)
 specs_val_input = specs_val_input.reshape((len(X_val),
                                            img_height, img_width, 1))
+print('There are a total of {} validation stimuli!'.format(specs_val_input.shape[0]))
 print("Done!")
 
+
 # set of augments that will be applied to the training data
-datagen = ImageDataGenerator(rescale=1./255,
-                             featurewise_center=True,
-                             featurewise_std_normalization=True)
+datagen = ImageDataGenerator(rescale=1./255)
 
 
-checkpoint = ModelCheckpoint('weights.best.hdf5', monitor='accuracy',
+checkpoint = ModelCheckpoint('./weights.best.hdf5', monitor='val_acc',
                              verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint]
 # # set up checkpoints for weights

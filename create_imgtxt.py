@@ -14,7 +14,7 @@ txtfile = open('./img_set.txt', mode='w')
 
 for l in languages:
     os.chdir(INPUT_FOLDER + str(l))
-    for i in range(0, 300):
+    for i in range(0, 1000):
         txtfile.write(str(spec_dict[l][i]) + " " + str(l))
         txtfile.write("\n")
     os.chdir(SCRIPT_DIR)
