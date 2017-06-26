@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 import os
 import numpy as np
+import math
 from my_spectrogram import my_specgram
 from collections import OrderedDict
 from scipy.io import wavfile
 import matplotlib.pylab as plt
 from pylab import rcParams
 
-rcParams['figure.figsize'] = 5, 3
+rcParams['figure.figsize'] = 6, 3
 
 SCRIPT_DIR = os.getcwd()
 INPUT_FOLDER = 'Input_audio_wav/'
@@ -21,11 +22,12 @@ for l in languages:
     audio_dict[l] = sorted(os.listdir(INPUT_FOLDER + l))
 
 
-def plot_spectrogram(audiopath, plotpath=None, NFFT_window=0.025,
+def plot_spectrogram(audiopath, plotpath=None, NFFT_window=0.25,
                      noverlap_window=0.022, freq_min=None, freq_max=None,
                      axis='on'):
     fs, data = wavfile.read(audiopath)
-    NFFT = int(fs*NFFT_window)  # 50ms window
+    data = data + np.random.normal(200, 75, len(data))
+    NFFT = pow(2, int(math.log(int(fs*NFFT_window), 2) + 0.5))  # 25ms window, nearest power of 2
     noverlap = int(fs*noverlap_window)
     fc = int(np.sqrt(freq_min*freq_max))
     # Pxx is the segments x freqs array of instantaneous power, freqs is
@@ -40,30 +42,17 @@ def plot_spectrogram(audiopath, plotpath=None, NFFT_window=0.025,
                                        pad_to=None, sides='default',
                                        scale_by_freq=None,
                                        minfreq=freq_min, maxfreq=freq_max)
-    plt.axis(axis)
+    plt.axis('off')
+    im.axes.axis('tight')
+    im.axes.get_xaxis().set_visible(False)
+    im.axes.get_yaxis().set_visible(False)
     if plotpath:
         plt.savefig(plotpath, bbox_inches='tight',
-                    transparent=False, pad_inches=0.05, dpi=96)
+                    transparent=False, pad_inches=0, dpi=96)
     else:
         plt.show()
     plt.clf()
 
-# Checking out some other ways to plot spectrograms
-# from matplotlib.mlab import specgram
-# from scipy.signal import gaussian
-# fs, data = wavfile.read('Input_audio_wav/Italian/ita-0011acd6.wav')
-# Pxx, freqs, bins, im = plt.specgram(data, NFFT=2048, Fs=fs, detrend=None,
-#                                     window=gaussian(2048, 128, sym=False),
-#                                     noverlap=1800, pad_to=3000)
-#
-# plt.ylim(0, 5500)
-# plt.show()
-
-
-# test function
-# plot_spectrogram('Input_audio_wav/Italian/ita-0011acd6.wav',
-#                  NFFT_window=0.025, noverlap_window=0.023,
-#                  freq_min=30, freq_max=5500)
 
 # create spectrograms of randomly drawn samples from each language
 import fnmatch
@@ -99,24 +88,3 @@ for i in range(0, len(random_wav)):
                              NFFT_window=0.025, noverlap_window=0.023,
                              freq_min=30, freq_max=5500)
         print('Done with {}.'.format(random_wav[i][j][:-4]))
-
-
-# # spectrogram loop for the first 100 audio files in each language
-# for key in audio_dict:
-#     if not os.path.exists(OUTPUT_FOLDER + str(key)):
-#         os.makedirs(OUTPUT_FOLDER + str(key))
-#         print('Successfully created a folder for ' + str(key) + '!')
-#     print('Moving to the {} folder.'.format(key))
-#     os.chdir(OUTPUT_FOLDER + str(key))
-#     print('Populating with spectrograms...')
-#     for i in range(0, 100):  # create spectrograms for the first 100 audiofiles
-#         for j in range(0, 10):
-#             plot_spectrogram('../../' + INPUT_FOLDER + str(key) + '/' +
-#                              audio_dict[key][i],
-#                              plotpath=str(audio_dict[key][i][:-4]) + '_' + str(j) + '.jpeg',
-#                              NFFT_window=0.05, noverlap_window=0.045,
-#                              freq_min=30, freq_max=5500)
-#         print('Done with {}. Moving onto {}.'.format(audio_dict[key][i][:-4],
-#                                                      audio_dict[key][i+1][:-4]))
-#     print('Going back to original directory.')
-#     os.chdir(SCRIPT_DIR)

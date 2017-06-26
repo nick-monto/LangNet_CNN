@@ -87,19 +87,21 @@ callbacks_list = [checkpoint]
 #                              mode='max')
 # callbacks_list = [checkpoint]
 
-# Define the model: 4 convolutional layers, 2 max pools
+# Define the model: 4 convolutional layers, 4 max pools
 model = Sequential()
 
-model.add(Conv2D(32, (5, 5), padding='same',
+model.add(Conv2D(32, (3, 3), padding='same',
                  input_shape=(img_height, img_width, 1)))
 model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Conv2D(64, (5, 5), padding='same'))
+model.add(Conv2D(64, (3, 3), padding='same'))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(128, (3, 3), padding='same'))
 model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(256, (3, 3), padding='same'))
 model.add(Activation('relu'))
@@ -125,15 +127,15 @@ print("Initializing the model...")
 # fits the model on batches with real-time data augmentation:
 model.fit_generator(datagen.flow(specs_train_input,
                                  labels_train,
-                                 batch_size=16),
-                    steps_per_epoch=len(X_train) / 16,
+                                 batch_size=8),
+                    steps_per_epoch=len(X_train) / 8,
                     epochs=num_epochs,
                     verbose=1,
                     callbacks=callbacks_list,
                     validation_data=datagen.flow(specs_val_input,
                                                  labels_val,
-                                                 batch_size=16),
-                    validation_steps=len(X_val) / 16)
+                                                 batch_size=8),
+                    validation_steps=len(X_val) / 8)
 
 
 # # this generator will read pictures found in a sub folder
