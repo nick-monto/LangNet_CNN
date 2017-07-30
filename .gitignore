@@ -5,3 +5,4 @@ Input_audio_wav_16k
 __pycache__
 weights.best.hdf5
 weights_16k.best.hdf5
+LangNet_4Conv.h5

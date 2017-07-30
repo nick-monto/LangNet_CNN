@@ -93,29 +93,31 @@ model = Sequential()
 
 model.add(Conv2D(32, (3, 3), padding='same',
                  input_shape=(img_height, img_width, 1),
-                 kernel_initializer='TruncatedNormal'))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+                 kernel_initializer='TruncatedNormal',
+                 activation='relu',
+                 name='conv1'))
+model.add(MaxPooling2D(pool_size=(2, 2), name='pool1'))
 
-model.add(Conv2D(64, (3, 3), padding='same'))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(64, (3, 3), padding='same',
+                 activation='relu',
+                 name='conv2'))
+model.add(MaxPooling2D(pool_size=(2, 2), name='pool2'))
 
-model.add(Conv2D(128, (3, 3), padding='same'))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(128, (3, 3), padding='same',
+                 activation='relu',
+                 name='conv3'))
+model.add(MaxPooling2D(pool_size=(2, 2), name='pool3'))
 
-model.add(Conv2D(256, (3, 3), padding='same'))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(256, (3, 3), padding='same',
+                 activation='relu',
+                 name='conv4'))
+model.add(MaxPooling2D(pool_size=(2, 2), name='pool4'))
 
-model.add(Flatten())  # converts 3D feature mapes to 1D feature vectors
-model.add(Dense(256))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))  # reset half of the weights to zero
+model.add(Flatten(name='flat1'))  # converts 3D feature mapes to 1D feature vectors
+model.add(Dense(256, activation='relu', name='fc1'))
+model.add(Dropout(0.5, name='do1'))  # reset half of the weights to zero
 
-model.add(Dense(8))
-model.add(Activation('softmax'))
+model.add(Dense(8, activation='softmax', name='output'))
 
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
@@ -139,7 +141,7 @@ model.fit_generator(datagen.flow(specs_train_input,
                                                  batch_size=8),
                     validation_steps=len(X_val) / 8)
 
-
+model.save('LangNet_4Conv.h5')
 # # this generator will read pictures found in a sub folder
 # # it will indefinitely generate batches of augmented image data
 # train_generator = train_datagen.flow_from_directory(
