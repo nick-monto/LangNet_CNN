@@ -12,7 +12,7 @@ from keras.callbacks import ModelCheckpoint
 
 img_height, img_width = 120, 200
 
-num_epochs = 10
+num_epochs = 5
 
 
 def find(pattern, path):
@@ -27,7 +27,7 @@ def find(pattern, path):
 def load_image(path):
     img = Image.open(path).convert('L')  # read in as grayscale
     img = img.resize((img_width, img_height))
-    img.load()  # loads the image into memory
+    # img.load()  # loads the image into memory
     img_data = np.asarray(img, dtype="float")
     return img_data
 
@@ -100,16 +100,19 @@ model.add(MaxPooling2D(pool_size=(2, 2), name='pool1'))
 
 model.add(Conv2D(64, (3, 3), padding='same',
                  activation='relu',
+                 kernel_initializer='TruncatedNormal',
                  name='conv2'))
 model.add(MaxPooling2D(pool_size=(2, 2), name='pool2'))
 
 model.add(Conv2D(128, (3, 3), padding='same',
                  activation='relu',
+                 kernel_initializer='TruncatedNormal',
                  name='conv3'))
 model.add(MaxPooling2D(pool_size=(2, 2), name='pool3'))
 
 model.add(Conv2D(256, (3, 3), padding='same',
                  activation='relu',
+                 kernel_initializer='TruncatedNormal',
                  name='conv4'))
 model.add(MaxPooling2D(pool_size=(2, 2), name='pool4'))
 
@@ -131,15 +134,15 @@ print("Initializing the model...")
 # fits the model on batches with real-time data augmentation:
 model.fit_generator(datagen.flow(specs_train_input,
                                  labels_train,
-                                 batch_size=8),
-                    steps_per_epoch=len(X_train) / 8,
+                                 batch_size=16),
+                    steps_per_epoch=len(X_train) / 16,
                     epochs=num_epochs,
                     verbose=1,
                     callbacks=callbacks_list,
                     validation_data=datagen.flow(specs_val_input,
                                                  labels_val,
-                                                 batch_size=8),
-                    validation_steps=len(X_val) / 8)
+                                                 batch_size=16),
+                    validation_steps=len(X_val) / 16)
 
 model.save('LangNet_4Conv.h5')
 # # this generator will read pictures found in a sub folder
