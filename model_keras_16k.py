@@ -117,7 +117,8 @@ model.add(Conv2D(256, (3, 3), padding='same',
 model.add(MaxPooling2D(pool_size=(2, 2), name='pool4'))
 
 model.add(Flatten(name='flat1'))  # converts 3D feature mapes to 1D feature vectors
-model.add(Dense(256, activation='relu', name='fc1'))
+model.add(Dense(256, activation='relu',
+                kernel_initializer='TruncatedNormal', name='fc1'))
 model.add(Dropout(0.5, name='do1'))  # reset half of the weights to zero
 
 model.add(Dense(8, activation='softmax', name='output'))
