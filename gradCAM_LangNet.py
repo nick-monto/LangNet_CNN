@@ -23,7 +23,7 @@ img_height = 120
 layer_name = 'conv4'
 
 # input directory
-INPUT_FOLDER = 'Input_spectrogram_16k/Training/'
+INPUT_FOLDER = 'Input_spectrogram_16k/'
 CLASS_INDEX = None
 
 def find(pattern, path):
@@ -76,13 +76,6 @@ def compile_saliency_function(model, activation_layer=layer_name):
     return K.function([input_img, K.learning_phase()], [saliency])
 
 
-input_img = model.input
-layer_dict = dict([(layer.name, layer) for layer in model.layers[1:]])
-layer_output = layer_dict['conv4'].output
-max_output = K.max(layer_output, axis=3)
-saliency = K.gradients(K.sum(max_output), input_img)[0]
-
-
 def modify_backprop(model, name):
     g = tf.get_default_graph()
     with g.gradient_override_map({'Relu': name}):
@@ -97,7 +90,7 @@ def modify_backprop(model, name):
                 layer.activation = tf.nn.relu
 
         # re-instanciate a new model
-        new_model = load_model('LangNet_4Conv.h5')
+        new_model = load_model('LangNet_4Conv_updated.h5')
     return new_model
 
 
@@ -196,10 +189,10 @@ def grad_cam(input_model, image, category_index, layer_name):
     return np.uint8(cam), heatmap
 
 
-preprocessed_input = load_image(find('nld-0c581ea3_converted_0.jpeg',
+preprocessed_input = load_image(find('bel-00a5ce93_converted_0.jpeg',
                                      INPUT_FOLDER))
 K.set_learning_phase(0)
-model = load_model('LangNet_4Conv.h5')
+model = load_model('LangNet_4Conv_updated.h5')
 layer_dict = dict([(layer.name, layer) for layer in model.layers[1:]])
 predictions = model.predict(preprocessed_input)
 
@@ -210,6 +203,7 @@ print('%s with probability %.2f' % (top_1[0], top_1[1]))
 predicted_class = np.argmax(predictions)
 cam, heatmap = grad_cam(model, preprocessed_input, predicted_class, layer_name)
 cv2.imwrite("gradcam.jpg", cam)
+print('Gradiant class activation image saved in the current directory!')
 
 register_gradient()
 guided_model = modify_backprop(model, 'GuidedBackProp')
@@ -217,3 +211,4 @@ saliency_fn = compile_saliency_function(guided_model)
 saliency = saliency_fn([preprocessed_input])
 gradcam = saliency[0] * heatmap[..., np.newaxis]
 cv2.imwrite("guided_gradcam.jpg", deprocess_image(gradcam))
+print('Guided gradiant class activation map image saved in the current directory')

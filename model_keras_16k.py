@@ -32,41 +32,44 @@ def load_image(path):
     return img_data
 
 
-stim_train = pd.read_table('img_set_16k.txt',
-                           delim_whitespace=True,
-                           names=['stimulus', 'language'])
+df_train = pd.read_table('img_set_16k_train.txt',
+                         delim_whitespace=True,
+                         names=['stimulus', 'language'])
 
-stim = stim_train['stimulus']
+stim_train = df_train['stimulus']
+labels_train = pd.get_dummies(df_train['language'])
+labels_train = labels_train.values
 
-labels = pd.get_dummies(stim_train['language'])
 
-# generate a train and validate set
-X_train, X_val, y_train, y_val = train_test_split(stim,
-                                                  labels,
-                                                  test_size=0.2)
+df_val = pd.read_table('img_set_16k_val.txt',
+                       delim_whitespace=True,
+                       names=['stimulus', 'language'])
 
-labels_train = y_train.values
-labels_val = y_val.values
+stim_val = df_val['stimulus']
+labels_val = pd.get_dummies(df_val['language'])
+labels_val = labels_val.values
 
 training_data_dir = 'Input_spectrogram_16k/Training'  # directory for training data
-# test_data_dir = 'Input_spectrogram/Test'  # directory for test data
+val_data_dir = 'Input_spectrogram_16k/Validation'  # directory for test data
+
 
 print("Preparing the input and labels...")
 specs_train_input = []
-for i in range(len(X_train)):
-    specs_train_input.append(load_image(find(X_train.iloc[i],
+for i in range(len(stim_train)):
+    specs_train_input.append(load_image(find(stim_train.iloc[i],
                                              training_data_dir)))
 specs_train_input = np.asarray(specs_train_input)
-specs_train_input = specs_train_input.reshape((len(X_train),
+specs_train_input = specs_train_input.reshape((len(stim_train),
                                                img_height, img_width, 1))
 print('There are a total of {} training stimuli!'.format(specs_train_input.shape[0]))
 
+
 specs_val_input = []
-for i in range(len(X_val)):
-    specs_val_input.append(load_image(find(X_val.iloc[i],
-                                           training_data_dir)))
+for i in range(len(stim_val)):
+    specs_val_input.append(load_image(find(stim_val.iloc[i],
+                                           val_data_dir)))
 specs_val_input = np.asarray(specs_val_input)
-specs_val_input = specs_val_input.reshape((len(X_val),
+specs_val_input = specs_val_input.reshape((len(stim_val),
                                            img_height, img_width, 1))
 print('There are a total of {} validation stimuli!'.format(specs_val_input.shape[0]))
 print("Done!")
@@ -76,17 +79,10 @@ print("Done!")
 datagen = ImageDataGenerator(rescale=1./255)
 
 
-checkpoint = ModelCheckpoint('./weights_16k.best.hdf5', monitor='val_acc',
+checkpoint = ModelCheckpoint('./weights_16k_updated.best.hdf5',
+                             monitor='val_acc',
                              verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint]
-# # set up checkpoints for weights
-# filepath="weights-improvement-{epoch:02d}-{accuracy:.2f}.hdf5"
-# checkpoint = ModelCheckpoint(filepath,
-#                              monitor='accuracy',
-#                              verbose=1,
-#                              save_best_only=True,
-#                              mode='max')
-# callbacks_list = [checkpoint]
 
 # Define the model: 4 convolutional layers, 4 max pools
 model = Sequential()
@@ -136,43 +132,13 @@ print("Initializing the model...")
 model.fit_generator(datagen.flow(specs_train_input,
                                  labels_train,
                                  batch_size=16),
-                    steps_per_epoch=len(X_train) / 16,
+                    steps_per_epoch=len(stim_train) / 16,
                     epochs=num_epochs,
                     verbose=1,
                     callbacks=callbacks_list,
                     validation_data=datagen.flow(specs_val_input,
                                                  labels_val,
-                                                 batch_size=16),
-                    validation_steps=len(X_val) / 16)
+                                                 batch_size=8),
+                    validation_steps=len(stim_val) / 8)
 
-model.save('LangNet_4Conv.h5')
-# # this generator will read pictures found in a sub folder
-# # it will indefinitely generate batches of augmented image data
-# train_generator = train_datagen.flow_from_directory(
-#         training_data_dir,
-#         target_size=(img_width, img_height),
-#         batch_size=32,
-#         class_mode='categorical')  # need categorical labels
-#
-# validation_generator = test_datagen.flow_from_directory(
-#         test_data_dir,
-#         target_size=(img_width, img_height),
-#         batch_size=32,
-#         class_mode='categorical')
-
-# model.fit_generator(
-#         train_generator,
-#         samples_per_epoch=num_train_samples,
-#         nb_epoch=num_epoch,
-#         validation_data=validation_generator,
-#         nb_val_samples=num_val_samples,
-#         verbose=1,
-#         callbacks=callbacks_list
-#         )
-
-# model.save_weights("model_trainingWeights_final.h5")
-# print("Saved model weights to disk")
-#
-# model.predict_generator(
-#         test_generator,
-#         val_samples=nb_test_samples)
+model.save('LangNet_4Conv_updated.h5')
