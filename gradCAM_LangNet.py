@@ -22,8 +22,12 @@ img_height = 120
 # the name of the layer we want to visualize
 layer_name = 'conv4'
 
+# user input the name of the Image we want to visualize
+INPUT = input('What file would you like to visualize the activation for: ')
+
 # input directory
 INPUT_FOLDER = 'Input_spectrogram_16k/'
+OUTPUT_FOLDER = 'grad_CAMS/'
 CLASS_INDEX = None
 
 def find(pattern, path):
@@ -189,20 +193,21 @@ def grad_cam(input_model, image, category_index, layer_name):
     return np.uint8(cam), heatmap
 
 
-preprocessed_input = load_image(find('bel-00a5ce93_converted_0.jpeg',
+preprocessed_input = load_image(find(INPUT,
                                      INPUT_FOLDER))
 K.set_learning_phase(0)
 model = load_model('LangNet_4Conv_updated.h5')
 layer_dict = dict([(layer.name, layer) for layer in model.layers[1:]])
 predictions = model.predict(preprocessed_input)
 
-top_1 = decode_predictions(predictions)[0][0]
+top_3 = decode_predictions(predictions)[0][0:3]
 print('Predicted class:')
-print('%s with probability %.2f' % (top_1[0], top_1[1]))
+for x in range(0, len(top_3)):
+    print('%s with probability %.2f' % (top_3[x][0], top_3[x][1]))
 
 predicted_class = np.argmax(predictions)
 cam, heatmap = grad_cam(model, preprocessed_input, predicted_class, layer_name)
-cv2.imwrite("gradcam.jpg", cam)
+cv2.imwrite(OUTPUT_FOLDER + "gradcam" + "_" + INPUT + ".jpg", cam)
 print('Gradiant class activation image saved in the current directory!')
 
 register_gradient()
@@ -210,5 +215,6 @@ guided_model = modify_backprop(model, 'GuidedBackProp')
 saliency_fn = compile_saliency_function(guided_model)
 saliency = saliency_fn([preprocessed_input])
 gradcam = saliency[0] * heatmap[..., np.newaxis]
-cv2.imwrite("guided_gradcam.jpg", deprocess_image(gradcam))
-print('Guided gradiant class activation map image saved in the current directory')
+cv2.imwrite(OUTPUT_FOLDER + "guided_gradcam" + "_" + INPUT + ".jpg",
+            deprocess_image(gradcam))
+print('Guided gradiant class activation map image saved in the current directory!')

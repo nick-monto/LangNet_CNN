@@ -89,12 +89,14 @@ model = Sequential()
 
 model.add(Conv2D(32, (3, 3), padding='same',
                  input_shape=(img_height, img_width, 1),
-                 kernel_initializer='TruncatedNormal',
+                 strides=(2, 2),
                  activation='relu',
+                 kernel_initializer='TruncatedNormal',
                  name='conv1'))
 model.add(MaxPooling2D(pool_size=(2, 2), name='pool1'))
 
 model.add(Conv2D(64, (3, 3), padding='same',
+                 strides=(2, 2),
                  activation='relu',
                  kernel_initializer='TruncatedNormal',
                  name='conv2'))
