@@ -30,6 +30,7 @@ INPUT_FOLDER = 'Input_spectrogram_16k/'
 OUTPUT_FOLDER = 'grad_CAMS/'
 CLASS_INDEX = None
 
+
 def find(pattern, path):
     result = []
     for root, dirs, files in os.walk(path):
@@ -207,7 +208,7 @@ for x in range(0, len(top_3)):
 
 predicted_class = np.argmax(predictions)
 cam, heatmap = grad_cam(model, preprocessed_input, predicted_class, layer_name)
-cv2.imwrite(OUTPUT_FOLDER + "gradcam" + "_" + INPUT + ".jpg", cam)
+cv2.imwrite(OUTPUT_FOLDER + "gradcam" + "_" + INPUT[:-17] + "_" + layer_name + ".jpg", cam)
 print('Gradiant class activation image saved in the current directory!')
 
 register_gradient()
@@ -215,6 +216,6 @@ guided_model = modify_backprop(model, 'GuidedBackProp')
 saliency_fn = compile_saliency_function(guided_model)
 saliency = saliency_fn([preprocessed_input])
 gradcam = saliency[0] * heatmap[..., np.newaxis]
-cv2.imwrite(OUTPUT_FOLDER + "guided_gradcam" + "_" + INPUT + ".jpg",
+cv2.imwrite(OUTPUT_FOLDER + "guided_gradcam" + "_" + INPUT[:-17] + "_" + layer_name + ".jpg",
             deprocess_image(gradcam))
 print('Guided gradiant class activation map image saved in the current directory!')

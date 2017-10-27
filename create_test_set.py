@@ -37,7 +37,6 @@ for i in range(0, len(used_set)):
 
 compare_set.sort()
 
-
 SCRIPT_DIR = os.getcwd()
 INPUT_FOLDER = 'Input_audio_wav_16k/'
 languages = os.listdir(INPUT_FOLDER)
