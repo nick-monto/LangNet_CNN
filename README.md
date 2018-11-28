@@ -1,4 +1,4 @@
-# SpeechRecog_CNN
+# LangNet_CNN
 <a href="https://yerevann.github.io/2015/10/11/spoken-language-identification-with-deep-convolutional-networks/">Hrayr Harutyunyan</a> showed that CNNs are very good at identifying what language is being spoken give multiple languages.
 
 This repository is for my exploration of CNNs in language recognition. I am currently using file from several <a href="http://shtooka.net/download.php">Shtooka</a> databases spanning eight languages. I am still searching for other freely available spoke word databases that contain recordings across many languages and multiple speakers within each language.
